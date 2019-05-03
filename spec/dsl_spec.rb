@@ -414,6 +414,19 @@ resource "Order" do
         end
       end
 
+      context "scope with array of hashes param" do
+        parameter :within_id, "Fancy search condition", :scope => :search
+
+        example "parsed properly" do
+          expect(client).to receive(:get) do |path, data, headers|
+            expect(Rack::Utils.parse_nested_query(path.gsub('/orders?', ''))).to eq({
+              "search" => [{"within_id" => 1}]
+            })
+          end
+          do_request("search" => [{"within_id" => 1}])
+        end
+      end
+
       context "with reserved name parameter" do
         context "without custom method name" do
           parameter :status, "Filter order by status"
